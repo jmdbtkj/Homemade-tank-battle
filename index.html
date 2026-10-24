@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#04020a">
+<title>NEON TANK // 霓虹坦克 · 赛博坦大战</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ambient-beam beam-a"></div>
+<div class="ambient-beam beam-b"></div>
+
+<div class="cabinet">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div class="brand-copy">
+        <div class="brand-title">NEON TANK<span class="brand-slash">//</span></div>
+        <div class="brand-sub">霓虹坦克 · BATTLE CITY 2088</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="sys-chip net-off" id="netChip"><i class="led"></i><span>NET LINK</span><b id="netStatusVal">OFFLINE</b></div>
+      <div class="sys-chip desktop-only"><span>SECTOR</span><b id="headerSector">01/03</b></div>
+      <button id="audioBtn" class="icon-btn" type="button" aria-label="切换音效">
+        <i class="audio-led"></i><span id="audioLabel">AUDIO ON</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="stage-col">
+      <div class="viewport" id="viewport">
+        <canvas id="game" width="624" height="624" aria-label="霓虹坦克游戏画面"></canvas>
+        <div class="screen-fx" aria-hidden="true"></div>
+        <div class="screen-label top-left" aria-hidden="true">FC-88 // LIVE FEED</div>
+        <div class="screen-label bottom-right" aria-hidden="true">SECURE CHANNEL 07</div>
+        <div id="banner" class="banner" aria-hidden="true">
+          <div class="banner-main"></div>
+          <div class="banner-sub"></div>
+        </div>
+        <div id="overlay" class="overlay" role="dialog" aria-modal="true"></div>
+      </div>
+
+      <div class="touch-controls" id="touchControls" aria-hidden="true">
+        <div class="dpad">
+          <button class="tbtn up" data-dir="up" type="button" aria-label="向上"><span>▲</span></button>
+          <button class="tbtn left" data-dir="left" type="button" aria-label="向左"><span>◀</span></button>
+          <button class="tbtn core" type="button" tabindex="-1" aria-hidden="true"></button>
+          <button class="tbtn right" data-dir="right" type="button" aria-label="向右"><span>▶</span></button>
+          <button class="tbtn down" data-dir="down" type="button" aria-label="向下"><span>▼</span></button>
+        </div>
+        <button class="fire-btn" id="touchFire" type="button" aria-label="开火">
+          <span>FIRE</span><small>脉冲发射</small>
+        </button>
+      </div>
+    </div>
+
+    <aside class="hud" aria-label="战斗状态">
+      <div class="hud-hero">
+        <div class="hud-heading"><span class="label">OPERATOR SCORE</span><i class="mini-led"></i></div>
+        <div id="scoreVal" class="score-value">000000</div>
+        <div class="hi-row"><span>HI-SCORE</span><b id="hiVal">000000</b></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-label">SECTOR</span>
+          <div class="stat-line"><b id="stageVal">01</b><small id="stageTotal">/ 03</small></div>
+        </div>
+        <div class="stat">
+          <span class="stat-label">HOSTILES</span>
+          <div class="stat-line"><b id="enemyCount" class="pink">20</b><small>LEFT</small></div>
+        </div>
+        <div class="stat">
+          <span class="stat-label">P1 ARMOR</span>
+          <div id="lifeIcons" class="life-icons" aria-label="P1 剩余生命"></div>
+        </div>
+        <div class="stat">
+          <span class="stat-label">P1 WEAPON</span>
+          <div id="weaponLabel" class="weapon-label">PULSE I</div>
+          <div class="weapon-bars" id="weaponBars"><i class="lit"></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <div class="stat-grid coop-only" id="coopStats">
+        <div class="stat p2-stat">
+          <span class="stat-label">P2 ARMOR</span>
+          <div id="lifeIcons2" class="life-icons p2" aria-label="P2 剩余生命"></div>
+        </div>
+        <div class="stat p2-stat">
+          <span class="stat-label">P2 WEAPON</span>
+          <div id="weaponLabel2" class="weapon-label p2">PULSE I</div>
+          <div class="weapon-bars p2" id="weaponBars2"><i class="lit"></i><i></i><i></i></div>
+        </div>
+      </div>
+
+      <div class="hud-block">
+        <div class="block-head"><span class="label">HOSTILE SIGNAL</span><span id="sectorName" class="sector-name">NEO-KOWLOON</span></div>
+        <div class="ticks" id="enemyTicks"></div>
+      </div>
+
+      <div class="hud-block core-block">
+        <div class="block-head"><span class="label">CITY CORE</span><span id="coreStatus" class="core-status"><i></i>ONLINE</span></div>
+        <div class="core-track"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="core-meta"><span>INTEGRITY</span><b id="coreIntegrity">100%</b><span>·</span><span>FIREWALL ACTIVE</span></div>
+      </div>
+
+      <div class="hud-block buff-block">
+        <div class="block-head"><span class="label">SYSTEM MODS</span></div>
+        <div class="buffs" id="buffRow"><span class="buff-idle">NO ACTIVE MODS</span></div>
+      </div>
+
+      <div class="hud-block controls-block">
+        <div class="block-head"><span class="label">CONTROL MATRIX</span></div>
+        <div class="control-line"><span class="keycap">WASD</span><span>P1 移动</span><span class="keycap wide">SPACE</span><span>开火</span></div>
+        <div class="control-line coop-only"><span class="keycap">↑↓←→</span><span>P2 移动</span><span class="keycap wide">ENTER</span><span>开火</span></div>
+        <div class="control-line"><span class="keycap">P</span><span>暂停</span><span class="keycap">M</span><span>静音</span></div>
+      </div>
+
+      <div class="hud-foot">
+        <span>BUILD 2088.10.21</span>
+        <span class="hud-foot-right">MISSION: DEFEND THE CORE</span>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <div class="ticker"><span>// 霓虹九龙 · 城市核心防线 // 敌方装甲军团正在突破街区 // 守住最后一座数据反应堆 // 脉冲武器已解锁 // 别让核心熄灭 // 霓虹不灭 · 城市不眠 //</span></div>
+    <div class="footer-status"><i></i>DEFCON 2</div>
+  </footer>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
